@@ -398,12 +398,18 @@ export default class Scrollbars extends Component {
     }
 
     showTracks() {
+        if (!getScrollbarWidth()) {
+            return;
+        }
         clearTimeout(this.hideTracksTimeout);
         css(this.trackHorizontal, { opacity: 1 });
         css(this.trackVertical, { opacity: 1 });
     }
 
     hideTracks() {
+        if (!getScrollbarWidth()) {
+            return;
+        }
         if (this.dragging) return;
         if (this.scrolling) return;
         if (this.trackMouseOver) return;
@@ -416,6 +422,9 @@ export default class Scrollbars extends Component {
     }
 
     detectScrolling() {
+        if (!getScrollbarWidth()) {
+            return;
+        }
         if (this.scrolling) return;
         this.scrolling = true;
         this.handleScrollStart();
@@ -569,29 +578,64 @@ export default class Scrollbars extends Component {
             })
         };
 
-        return createElement(tagName, { ...props, style: containerStyle, ref: (ref) => { this.container = ref; } }, [
+        const scrollElements = [
             cloneElement(
                 renderView({ style: viewStyle }),
-                { key: 'view', ref: (ref) => { this.view = ref; } },
+                {
+                    key: 'view',
+                    ref: ref => {
+                      this.view = ref;
+                    },
+                },
                 children
             ),
-            cloneElement(
-                renderTrackHorizontal({ style: trackHorizontalStyle }),
-                { key: 'trackHorizontal', ref: (ref) => { this.trackHorizontal = ref; } },
+        ];
+
+        if (scrollbarWidth) {
+            Array.prototype.apply(scrollElements, [
                 cloneElement(
-                    renderThumbHorizontal({ style: thumbHorizontalStyleDefault }),
-                    { ref: (ref) => { this.thumbHorizontal = ref; } }
-                )
-            ),
-            cloneElement(
-                renderTrackVertical({ style: trackVerticalStyle }),
-                { key: 'trackVertical', ref: (ref) => { this.trackVertical = ref; } },
+                    renderView({ style: viewStyle }),
+                    {
+                        key: 'view',
+                        ref: ref => {
+                            this.view = ref;
+                        },
+                    },
+                    children
+                ),
                 cloneElement(
-                    renderThumbVertical({ style: thumbVerticalStyleDefault }),
-                    { ref: (ref) => { this.thumbVertical = ref; } }
-                )
-            )
-        ]);
+                    renderTrackHorizontal({ style: trackHorizontalStyle }),
+                    {
+                        key: 'trackHorizontal',
+                        ref: ref => {
+                            this.trackHorizontal = ref;
+                        },
+                    },
+                    cloneElement(renderThumbHorizontal({ style: thumbHorizontalStyleDefault }), {
+                        ref: ref => {
+                            this.thumbHorizontal = ref;
+                        },
+                    })
+                ),
+                cloneElement(
+                    renderTrackVertical({ style: trackVerticalStyle }),
+                    {
+                        key: 'trackVertical',
+                        ref: ref => {
+                            this.trackVertical = ref;
+                        },
+                    },
+                    cloneElement(renderThumbVertical({ style: thumbVerticalStyleDefault }), {
+                        ref: ref => {
+                            this.thumbVertical = ref;
+                        },
+                    })
+                ),
+            ]);
+        }
+
+
+        return createElement(tagName, { ...props, style: containerStyle, ref: (ref) => { this.container = ref; } }, scrollElements);
     }
 }
 
