@@ -578,7 +578,7 @@ export default class Scrollbars extends Component {
             })
         };
 
-        const scrollElements = [
+        let scrollElements = [
             cloneElement(
                 renderView({ style: viewStyle }),
                 {
@@ -592,7 +592,17 @@ export default class Scrollbars extends Component {
         ];
 
         if (scrollbarWidth) {
-            Array.prototype.apply(scrollElements, [
+            scrollElements = [
+                cloneElement(
+                    renderView({ style: viewStyle }),
+                    {
+                        key: 'view',
+                        ref: ref => {
+                          this.view = ref;
+                        },
+                    },
+                    children
+                ),
                 cloneElement(
                     renderView({ style: viewStyle }),
                     {
@@ -631,7 +641,7 @@ export default class Scrollbars extends Component {
                         },
                     })
                 ),
-            ]);
+            ];
         }
 
 
